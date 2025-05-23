@@ -1,0 +1,2 @@
+C:/Users/User/AndroidStudioProjects/adminsneaker/android/app/.cxx/RelWithDebInfo/132j682h/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/User/AndroidStudioProjects/adminsneaker/android/app/.cxx/RelWithDebInfo/132j682h/arm64-v8a/CMakeFiles/rebuild_cache.dir
