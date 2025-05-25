@@ -3,9 +3,8 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-
-import '../../datasource/model/CommentModel.dart';
-import 'Comment_provider.dart';
+import '../../domains/datasource/model/CommentModel.dart';
+import '../../domains/Controller/Comment_provider.dart';
 
 class CommentScreen extends StatefulWidget {
   const CommentScreen({super.key});

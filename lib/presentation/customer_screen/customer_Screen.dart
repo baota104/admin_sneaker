@@ -4,8 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-import '../../datasource/model/UserModel.dart';
-import 'customer_provider.dart';
+
+import '../../domains/datasource/model/UserModel.dart';
+import '../../domains/Controller/customer_provider.dart';
 
 class CustomerScreen extends StatefulWidget {
   const CustomerScreen({super.key});

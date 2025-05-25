@@ -2,7 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-import '../../datasource/model/ProductModel.dart';
+import '../../domains/datasource/model/ProductModel.dart';
+
+
 
 class ProductDetailScreen extends StatefulWidget {
   final ProductModel product; // Nhận ProductModel làm tham số
@@ -16,7 +18,16 @@ class ProductDetailScreen extends StatefulWidget {
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   bool isExpanded = false;
 
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+  final TransformationController _transformationController = TransformationController();
 
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _transformationController.dispose();
+    super.dispose();
+  }
   @override
   void initState() {
     super.initState();
@@ -133,24 +144,85 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   // 🔹 Hình ảnh sản phẩm
-  Widget _buildImage(double screenWidth, double screenHeight) {
-    return Container(
-      margin: EdgeInsets.symmetric(horizontal: 20),
-      child: Center(
-        child: Image.network(
-          widget.product.imageUrl,
-          width: screenWidth * 0.7,
+  Widget  _buildImage(double screenWidth, double screenHeight) {
+    return  Column(
+      children: [
+        Container(
           height: screenHeight * 0.25,
-          fit: BoxFit.fitWidth,
-          errorBuilder: (context, error, stackTrace) => Icon(
-            Icons.image_not_supported,
-            size: screenWidth * 0.5,
-            color: Colors.grey,
+          child: PageView.builder(
+            controller: _pageController,
+            onPageChanged: (index) {
+              setState(() {
+                _currentPage = index;
+              });
+            },
+            itemCount: widget.product.imageUrls.length,
+            itemBuilder: (context, index) {
+              return GestureDetector(
+                onTap: () {
+                  // Hiển thị ảnh zoom khi nhấn
+                  showDialog(
+                    context: context,
+                    builder: (context) => Dialog(
+                      insetPadding: EdgeInsets.all(20),
+                      child: InteractiveViewer(
+                        transformationController: _transformationController,
+                        panEnabled: true,
+                        minScale: 0.5,
+                        maxScale: 4.0,
+                        child: Image.network(
+                          widget.product.imageUrls[index],
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+                child: Container(
+                  margin: EdgeInsets.symmetric(horizontal: 10),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Image.network(
+                      widget.product.imageUrls[index],
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ),
-      ),
+        SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(
+            widget.product.imageUrls.length,
+                (index) => GestureDetector(
+              onTap: () {
+                _pageController.animateToPage(
+                  index,
+                  duration: Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                );
+              },
+              child: Container(
+                width: 8,
+                height: 8,
+                margin: EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: _currentPage == index
+                      ? Colors.blue
+                      : Colors.grey.withOpacity(0.5),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
+
 
   // 🔹 Mô tả sản phẩm
   Widget _buildDescription(double screenWidth) {

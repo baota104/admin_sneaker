@@ -3,7 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 
-import '../../datasource/model/UserModel.dart';
+import '../datasource/model/UserModel.dart';
+
+
 
 class CustomerProvider with ChangeNotifier {
   List<UserModel> _customers = [];

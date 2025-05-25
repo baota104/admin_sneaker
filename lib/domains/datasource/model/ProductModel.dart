@@ -8,7 +8,7 @@ class ProductModel {
   String activity;
   String description;
   int status;
-  String imageUrl;
+  List<String> imageUrls; // Đổi từ String sang List<String>
   bool isloved;
   int size;
 
@@ -17,12 +17,12 @@ class ProductModel {
     required this.name,
     required this.brand,
     required this.price,
-    required this.discountPrice,
+    this.discountPrice,
     required this.stock,
     required this.activity,
     required this.description,
     required this.status,
-    required this.imageUrl,
+    required this.imageUrls, // cập nhật ở đây
     required this.isloved,
     required this.size,
   });
@@ -35,10 +35,10 @@ class ProductModel {
       "price": price,
       "discountPrice": discountPrice,
       "stock": stock,
-      "activity":activity,
+      "activity": activity,
       "description": description,
-      "status":status,
-      "imageUrl": imageUrl,
+      "status": status,
+      "imageUrl": imageUrls, // cập nhật ở đây
       "isloved": isloved,
       "size": size,
     };
@@ -46,20 +46,31 @@ class ProductModel {
 
   factory ProductModel.fromMap(Map<String, dynamic> map) {
     return ProductModel(
-      productId: map["product_id"] ?? "", // Đảm bảo không bị null
+      productId: map["product_id"] ?? "",
       name: map["name"] ?? "Không có tên",
       brand: map["brand"] ?? "Không rõ thương hiệu",
       price: (map["price"] ?? 0).toDouble(),
-      discountPrice: map["discountPrice"] != null ? (map["discountPrice"] as num).toDouble() : null,
+      discountPrice: map["discountPrice"] != null
+          ? (map["discountPrice"] as num).toDouble()
+          : null,
       stock: map["stock"] ?? 0,
       activity: map["activity"] ?? "",
       description: map["description"] ?? "",
       status: (map["status"] ?? 0).toInt(),
-      imageUrl: map["imageUrl"] ?? "",
+
+      imageUrls: (map["imageUrl"] is List)
+          ? (map["imageUrl"] as List)
+          .where((item) => item is String)
+          .map((item) => item as String)
+          .toList()
+          : [],
+
       isloved: map["isloved"] ?? false,
       size: (map["size"] ?? 0).toInt(),
     );
   }
+
+
 
 
 }

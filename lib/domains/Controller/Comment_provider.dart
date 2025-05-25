@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
-import '../../datasource/model/CommentModel.dart';
-import '../../datasource/model/NotificationModel.dart';
+
+import '../datasource/model/CommentModel.dart';
+import '../datasource/model/NotificationModel.dart';
+
 
 class CommentProvider with ChangeNotifier {
   List<CommentModel> _comments = [];

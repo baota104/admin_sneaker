@@ -4,8 +4,8 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
-import '../../datasource/model/ProductModel.dart';
-import 'ProductProvider.dart';
+import '../../domains/datasource/model/ProductModel.dart';
+import '../../domains/Controller/ProductProvider.dart';
 
 class ProductManagementScreen extends StatefulWidget {
   @override
@@ -191,7 +191,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Image.network(
-                      item.imageUrl,
+                      item.imageUrls.elementAt(0),
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) => Icon(
                           Icons.image, size: screenWidth * 0.1, color: Colors.grey
@@ -235,14 +235,16 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
       ),
     );
   }
-
   void _editProduct(BuildContext context, ProductProvider productProvider, ProductModel product) {
     final _nameController = TextEditingController(text: product.name);
     final _priceController = TextEditingController(text: product.price.toString());
-    final _discountpriceController = TextEditingController(text: product.discountPrice.toString());
+    final _discountpriceController = TextEditingController(text: product.discountPrice?.toString() ?? '');
     final _brandController = TextEditingController(text: product.brand);
     final _stockController = TextEditingController(text: product.stock.toString());
     final _sizeController = TextEditingController(text: product.size.toString());
+    final _descriptionController = TextEditingController(text: product.description);
+    final _statusController = TextEditingController(text: product.status.toString());
+    final _imageUrlsController = TextEditingController(text: product.imageUrls.join('\n')); // Hiển thị mỗi URL trên 1 dòng
 
     showDialog(
       context: context,
@@ -268,7 +270,8 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                 ),
                 TextField(
                   controller: _discountpriceController,
-                  decoration: InputDecoration(labelText: "Discount"),
+                  decoration: InputDecoration(labelText: "Discount Price"),
+                  keyboardType: TextInputType.number,
                 ),
                 TextField(
                   controller: _stockController,
@@ -279,6 +282,25 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                   controller: _sizeController,
                   decoration: InputDecoration(labelText: "Size"),
                   keyboardType: TextInputType.number,
+                ),
+                TextField(
+                  controller: _statusController,
+                  decoration: InputDecoration(labelText: "Status (%)"),
+                  keyboardType: TextInputType.number,
+                ),
+                TextField(
+                  controller: _descriptionController,
+                  decoration: InputDecoration(labelText: "Description"),
+                  maxLines: 3,
+                ),
+                TextField(
+                  controller: _imageUrlsController,
+                  decoration: InputDecoration(
+                    labelText: "Image URLs (one per line)",
+                    hintText: "Enter each image URL on a new line",
+                  ),
+                  maxLines: 5,
+                  keyboardType: TextInputType.multiline,
                 ),
               ],
             ),
@@ -296,12 +318,12 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                   name: _nameController.text,
                   brand: _brandController.text,
                   price: double.tryParse(_priceController.text) ?? 0,
-                  discountPrice: double.tryParse(_discountpriceController.text) ?? 0,
+                  discountPrice: double.tryParse(_discountpriceController.text),
                   stock: int.tryParse(_stockController.text) ?? 0,
                   activity: product.activity,
-                  description: product.description,
-                  status: product.status,
-                  imageUrl: product.imageUrl,
+                  description: _descriptionController.text,
+                  status: int.tryParse(_statusController.text) ?? 0,
+                  imageUrls: _imageUrlsController.text.split('\n').where((url) => url.trim().isNotEmpty).toList(),
                   isloved: product.isloved,
                   size: int.tryParse(_sizeController.text) ?? 0,
                 );
@@ -325,7 +347,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
     final _stockController = TextEditingController();
     final _sizeController = TextEditingController();
     final _statusController = TextEditingController();
-    final _imageUrlController = TextEditingController();
+    final _imageUrlsController = TextEditingController();
     final _descriptionController = TextEditingController();
 
     String _selectedActivity = 'basketball';
@@ -355,7 +377,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                   ),
                   TextFormField(
                     controller: _priceController,
-                    decoration: InputDecoration(labelText: "Giá"),
+                    decoration: InputDecoration(labelText: "Price"),
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.isEmpty) return "Mustn't leave empty";
@@ -373,7 +395,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                       final discount = double.tryParse(value);
                       final price = double.tryParse(_priceController.text);
                       if (discount == null || discount < 0) return "DiscountPrice must be greater than 0";
-                      if (price != null && discount > price) return "DiscountPrice must be greater than Price";
+                      if (price != null && discount > price) return "DiscountPrice must be less than Price";
                       return null;
                     },
                   ),
@@ -401,7 +423,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                   ),
                   TextFormField(
                     controller: _statusController,
-                    decoration: InputDecoration(labelText: "new status (%)"),
+                    decoration: InputDecoration(labelText: "Status (%)"),
                     keyboardType: TextInputType.number,
                     validator: (value) {
                       if (value == null || value.isEmpty) return "Mustn't leave empty";
@@ -414,22 +436,29 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                   ),
                   TextFormField(
                     controller: _descriptionController,
-                    decoration: InputDecoration(labelText: "description"),
+                    decoration: InputDecoration(labelText: "Description"),
                     maxLines: 3,
                     validator: (value) =>
                     value == null || value.isEmpty ? "Mustn't leave empty" : null,
                   ),
                   TextFormField(
-                    controller: _imageUrlController,
-                    decoration: InputDecoration(labelText: "URL Product"),
+                    controller: _imageUrlsController,
+                    decoration: InputDecoration(
+                      labelText: "Image URLs (one per line)",
+                      hintText: "Enter each image URL on a new line",
+                    ),
+                    maxLines: 5,
+                    keyboardType: TextInputType.multiline,
                     validator: (value) {
-                      if (value == null || value.isEmpty) return "Mustn't leave empty";
+                      if (value == null || value.isEmpty) return "Must provide at least one image URL";
+                      final urls = value.split('\n').where((url) => url.trim().isNotEmpty).toList();
+                      if (urls.isEmpty) return "Must provide at least one valid image URL";
                       return null;
                     },
                   ),
                   DropdownButtonFormField<String>(
                     value: _selectedActivity,
-                    decoration: InputDecoration(labelText: "activity"),
+                    decoration: InputDecoration(labelText: "Activity"),
                     items: ['basketball', 'volleyball', 'running', 'daily', 'football']
                         .map((activity) => DropdownMenuItem(
                       value: activity,
@@ -441,6 +470,8 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                         _selectedActivity = newValue;
                       }
                     },
+                    validator: (value) =>
+                    value == null ? "Please select an activity" : null,
                   ),
                 ],
               ),
@@ -460,12 +491,15 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> {
                     name: _nameController.text,
                     brand: _brandController.text,
                     price: double.parse(_priceController.text),
-                    discountPrice: double.tryParse(_discountController.text) ?? 0,
+                    discountPrice: double.tryParse(_discountController.text),
                     stock: int.parse(_stockController.text),
                     activity: _selectedActivity,
                     description: _descriptionController.text,
                     status: int.parse(_statusController.text),
-                    imageUrl: _imageUrlController.text,
+                    imageUrls: _imageUrlsController.text
+                        .split('\n')
+                        .where((url) => url.trim().isNotEmpty)
+                        .toList(),
                     isloved: false,
                     size: int.parse(_sizeController.text),
                   );
